@@ -7,7 +7,7 @@ trigger:
 - main
 
 pool:
-  My-self-hosted-agent: Agent-ubuntu-22.04
+  name: My-self-hosted-agent
 
 steps:
 - task: NodeTool@0
