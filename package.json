@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo 'Build step executed'"  // Example build command
+    "build": "echo 'Build step executed'"
   },
   "keywords": [],
   "author": "",
@@ -15,4 +15,3 @@
     "socket.io": "^4.8.0"
   }
 }
-
