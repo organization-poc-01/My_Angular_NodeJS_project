@@ -43,3 +43,17 @@ steps:
     WebAppName: 'webapp-gagan-test-001'
     packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
     RuntimeStack: 'NODE|12-lts'
+  
+- task: AzureAppServiceSettings@1
+  inputs:
+    azureSubscription: 'DevOps-003'
+    appName: 'webapp-gagan-test-001'
+    resourceGroupName: 'rg-gagan-01'
+    generalSettings: |
+      [
+         {
+            "alwaysOn": true,
+            "startupCommand": "node index.js",
+            "webSocketsEnabled": false
+         }
+      ]
