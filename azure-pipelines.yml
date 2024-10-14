@@ -40,5 +40,5 @@ steps:
     azureSubscription: 'DevOps-003'
     appType: 'webAppLinux'
     WebAppName: 'webapp-gagan-test-001'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
     RuntimeStack: 'NODE|12-lts'
