@@ -54,6 +54,6 @@ steps:
          {
             "alwaysOn": true,
             "startupCommand": "node index.js",
-            "webSocketsEnabled": false
+            "webSocketsEnabled": true
          }
       ]
