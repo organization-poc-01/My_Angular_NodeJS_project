@@ -1,4 +1,6 @@
 trigger:
+- dev
+- uat
 - main
 
 pr:
