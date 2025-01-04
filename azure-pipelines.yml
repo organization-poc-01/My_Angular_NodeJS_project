@@ -9,9 +9,6 @@ pr:
       - main
       - feature/*
       - bugfix/*
-  requiredReviewers:
-    - DevOps-Reviewer
-  workItemLinking: true
 
 stages:
 # Build Stage
@@ -54,7 +51,6 @@ stages:
   jobs:
   - job: Deploy
     displayName: 'Deploy to Dev'
-    environment: 'Dev'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -91,7 +87,6 @@ stages:
   jobs:
   - job: Deploy
     displayName: 'Deploy to UAT'
-    environment: 'UAT'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -128,7 +123,6 @@ stages:
   jobs:
   - job: Deploy
     displayName: 'Deploy to Production'
-    environment: 'Production'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
