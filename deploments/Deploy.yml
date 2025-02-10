@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: nodejs-app
-        image: REGISTRY_NAME.azurecr.io/IMAGE_NAME
+        image: gagan01.azurecr.io/nodejs-app
         ports:
         - containerPort: 3000
         resources:
