@@ -1,20 +1,14 @@
-FROM node:18-alpine as builder
+# Use Node.js base image
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm install
-RUN npm install -g @angular/cli
-
-COPY . .
+# Copy only the necessary files
 COPY dist/ ./dist/
 COPY node_modules/ ./node_modules/
+COPY package.json .
+COPY server.js .
 
-FROM nginx:alpine
+EXPOSE 3000
 
-COPY --from=builder /app/dist/* /usr/share/nginx/html/
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "server.js"]
