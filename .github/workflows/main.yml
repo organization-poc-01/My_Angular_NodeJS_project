@@ -1,47 +1,63 @@
 name: Node.js CI/CD
 
-# on:
-#   push:
-#     branches: [ "dev", "uat", "prod" ]
-#   pull_request:
-#     branches: [ "dev", "uat", "prod" ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
   AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-  AKS_CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
-  AKS_RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
-  REGISTRY_NAME: ${{ secrets.REGISTRY_NAME }}
+  AKS_CLUSTER_NAME: aks-gagan-poc-eus-001
+  AKS_RESOURCE_GROUP: gagan-rg
+  REGISTRY_NAME: gagan01
   IMAGE_NAME: nodejs-app
+  NODE_VERSION: '18.x'
+
 jobs:
   build:
-    runs-on: self-hosted 
-
-    environment:
-      name: ${{ github.ref_name }}
-
-    strategy:
-      matrix:
-        node-version: [22.x]
-
+    runs-on: ubuntu-latest
+    
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-
+    
+    - name: Clear node_modules
+      run: |
+        rm -rf node_modules
+        rm -f package-lock.json
+    
     - name: Install Dependencies
-      run: npm ci
+      run: |
+        npm cache clean --force
+        npm install
+        npm install -g @angular/cli
+        npm install express
     
-    - name: Build Application
-      run: npm run build --if-present 
+    - name: Lint
+      run: npm run lint
     
-    - name: Run Tests
-      run: npm test
-      if: always()
+    - name: Run Unit Tests
+      run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadless
+    
+    - name: Build
+      run: npm run build --prod
+    
+    - name: Archive Production Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-and-modules
+        path: |
+          dist/
+          node_modules/
+          package.json
+          package-lock.json
+          server.js
 
     - name: Login to Azure
       uses: azure/login@v1
@@ -62,14 +78,17 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: self-hosted
-
+    runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name }}
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist-and-modules
 
     - name: Login to Azure
       uses: azure/login@v1
@@ -82,16 +101,15 @@ jobs:
         resource-group: ${{ env.AKS_RESOURCE_GROUP }}
         cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-    - name: Create Namespace (if it doesn't exist)
+    - name: Create Namespace
       run: |
-        kubectl create namespace ${{ github.ref_name }} || echo "Namespace already exists"
+        kubectl create namespace angularapp
 
     - name: Deploy to AKS
       uses: azure/k8s-deploy@v4
       with:
-        namespace: ${{ github.ref_name }} 
+        namespace: angularapp
         manifests: |
-          k8s/deployment.yaml             # Replace with the path to your deployment YAML file
-          k8s/service.yaml                # Replace with the path to your service YAML file
+          deploments/Deploy.yml
         images: |
           ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
